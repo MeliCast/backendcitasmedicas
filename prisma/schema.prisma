@@ -1,0 +1,59 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model Especialidad {
+  id          Int        @id @unique @default(autoincrement())
+  nombre      String     @db.VarChar(100)
+  descripcion String     @db.VarChar(100)
+  medicos     Medicos[]
+  reservas    Reservas[]
+
+  @@map(name: "especialidad")
+}
+
+model Medicos {
+  id              Int          @id @unique @default(autoincrement())
+  nombre          String       @db.VarChar(50)
+  email           String       @db.VarChar(100)
+  EspecialidadId  Int          @map(name: "especialidad_id")
+  especialidadMed Especialidad @relation(fields: [EspecialidadId], references: [id])
+  reservas    Reservas[]
+  @@map(name: "medicos")
+}
+
+model Usuario {
+  id       Int     @id @unique @default(autoincrement())
+  usuario  String? @db.VarChar(50)
+  correo   String  @unique @db.VarChar(50)
+  password String?
+  hashgen  String? @db.VarChar(200)
+
+  @@map(name: "usuarios")
+}
+
+model Reservas {
+  id             Int          @id @unique @default(autoincrement())
+  tipocita       TipoCita
+  fechcita       DateTime
+  medicoId Int          @map(name: "medico_id")
+  medico          Medicos @relation(fields: [medicoId], references: [id])
+  especialidadId Int          @map(name: "especialidad_id")
+  especialidad   Especialidad @relation(fields: [especialidadId], references: [id])
+  importe    Decimal
+
+  @@map(name: "reservas")
+}
+
+enum TipoCita {
+  PRESENCIAL
+  TELECONSULTA
+}
